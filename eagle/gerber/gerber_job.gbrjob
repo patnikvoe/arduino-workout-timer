@@ -1,13 +1,13 @@
 G04 Gerber job file.*
 %TF.FileFunction,JobInfo*%
 %TF.GenerationSoftware,Autodesk,EAGLE,9.0.1*%
-%TF.CreationDate,2018-05-25T20:11:19Z*%
+%TF.CreationDate,2018-06-09T17:57:24Z*%
 %TF.Part,Single*%
 %MOMM*%
 %TJ.B_Owner,Patrick Niklas Voelkl <patrick.n.voelkl@stud.fh-rosenheim.de>*%
-%TJ.B_ID,NanoConnectionBoard*%
+%TJ.B_ID,OneBoard*%
 %TJ.B_LayerNum,2*%
 %TJ.B_Thickness,1.570000*%
-%TJ.B_Size_X,52.070000*%
-%TJ.B_Size_Y,69.850000*%
+%TJ.B_Size_X,70.000000*%
+%TJ.B_Size_Y,70.000000*%
 M02*
