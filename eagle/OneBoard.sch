@@ -8839,7 +8839,7 @@ drill 1.1 mm</description>
 <part name="R4" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="180"/>
 <part name="R5" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="1K"/>
 <part name="R6" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="820"/>
-<part name="R7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="1k"/>
+<part name="R7" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/2" value="470"/>
 <part name="GND1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="025-025X050" package3d_urn="urn:adsk.eagle:package:23629/2" value="x"/>
 <part name="DISPLAY" library="My Breakout Boards" library_urn="urn:adsk.eagle:library:2131756" deviceset="OLED_BREAKOUT" device="" package3d_urn="urn:adsk.eagle:package:2131762/2"/>
@@ -9463,6 +9463,11 @@ drill 1.1 mm</description>
 <wire x1="274.32" y1="-48.26" x2="274.32" y2="-71.12" width="0.1524" layer="91"/>
 <label x="274.32" y="-71.12" size="1.778" layer="95" rot="R90"/>
 </segment>
+<segment>
+<pinref part="POWERBOOST" gate="G$1" pin="5V"/>
+<wire x1="233.68" y1="68.58" x2="243.84" y2="68.58" width="0.1524" layer="91"/>
+<label x="243.84" y="68.58" size="1.778" layer="95"/>
+</segment>
 </net>
 <net name="D12" class="0">
 <segment>
@@ -9623,13 +9628,6 @@ drill 1.1 mm</description>
 <pinref part="U$7" gate="G$1" pin="A3"/>
 <wire x1="254" y1="-48.26" x2="254" y2="-66.04" width="0.1524" layer="91"/>
 <label x="254" y="-63.5" size="1.778" layer="95" rot="R90"/>
-</segment>
-</net>
-<net name="VOUT" class="0">
-<segment>
-<pinref part="POWERBOOST" gate="G$1" pin="5V"/>
-<wire x1="233.68" y1="68.58" x2="243.84" y2="68.58" width="0.1524" layer="91"/>
-<label x="243.84" y="68.58" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$1" class="0">

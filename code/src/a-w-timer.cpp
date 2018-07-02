@@ -25,26 +25,15 @@
 #define potPin1 A1
 #define potPin2 A0
 #define trimPin A2
-
-// Define Digital Pins
 #define speakerPin 5
-#define startTimer1Pin 15
-#define startTimer2Pin 14
-#define startHangboard 10
-#define startPin1 4
-#define startPin2 6
-#define startPin3 7
-#define startPin4 8
-#define startPin5 9
-#define startPin6 16
 
 // define Countdown Values in Seconds
-#define counterPin1 15
-#define counterPin2 30
-#define counterPin3 45
-#define counterPin4 60
-#define counterPin5 120
-#define counterPin6 300
+#define COUNTER1 15
+#define COUNTER2 30
+#define COUNTER3 45
+#define COUNTER4 60
+#define COUNTER5 120
+#define COUNTER6 300
 
 // define Melodys for choosing
 #define MELODY1 1
@@ -59,6 +48,20 @@
 // define Notes
 #define numNotes 4
 const int notes[numNotes] = {262, 294, 330, 349};
+
+// OLED
+#define LOGO16_GLCD_HEIGHT 16
+#define LOGO16_GLCD_WIDTH 16
+static const unsigned char PROGMEM logo16_glcd_bmp[] = {
+    B00000000, B11000000, B00000001, B11000000, B00000001, B11000000, B00000011,
+    B11100000, B11110011, B11100000, B11111110, B11111000, B01111110, B11111111,
+    B00110011, B10011111, B00011111, B11111100, B00001101, B01110000, B00011011,
+    B10100000, B00111111, B11100000, B00111111, B11110000, B01111100, B11110000,
+    B01110000, B01110000, B00000000, B00110000};
+
+#if (SSD1306_LCDHEIGHT != 32)
+#error("Height incorrect, please fix Adafruit_SSD1306.h!");
+#endif
 
 // define Variables
 unsigned long us_test = 0;
@@ -82,12 +85,29 @@ char go[] = "GO! GO! GO!";
 char remainingTime[] = "Remaining Time";
 char finished[] = "Finished!            On to the next       Exercise!";
 char finished2[] = "Finished the workout!Good Job!";
+
 // Init OLED
 Adafruit_SSD1306 display(OLED_RESET);
 
 // Init the DS3231 using the hardware interface
 RTC_DS3231 rtc;
 
+#define COLMAX 3
+#define ROWMAX 4
+
+int row[ROWMAX]; // Stores the pins for the rows
+
+int col[COLMAX]; // Stores the Pins for the Columns
+
+int key[ROWMAX][ROWMAX];
+
+// addin two Matricies
+void AddMatrix(int MAT1[ROWMAX][COLMAX], int MAT2[ROWMAX][COLMAX]);
+// reset all keys
+void resetKeys();
+// check if button pressed return number
+int ButtonPressed();
+int keypress(int r, int c);
 // Define functions
 void playMelody(int melody);
 
@@ -155,9 +175,24 @@ void showTimeSpan(const char *txt, const TimeSpan &ts) {
 */
 
 void setup() {
-
   // Setup Serial connection
   Serial.begin(115200);
+
+  row[0] = 3; // 1. Row
+  row[1] = 4; // 2. Row
+  row[2] = 5; // 3. Row
+  row[3] = 6; // 4. Row
+  col[0] = 9; // 1. Column
+  col[1] = 9; // 2. Column
+  col[2] = 9; // 3. Column
+
+  for (int i = 0; i < ROWMAX; i++) {
+    pinMode(row[i], OUTPUT);
+  }
+  for (int i = 0; i < ROWMAX; i++) {
+    pinMode(col[i], INPUT);
+    digitalWrite(col[i], HIGH);
+  }
 
   // by default, we'll generate the high voltage from the 3.3v line internally!
   // (neat!)
@@ -185,21 +220,13 @@ void setup() {
     // January 21, 2014 at 3am you would call:
     rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
   }
+  Serial.println(rtc.now().unixtime());
   delay(2000);
-  pinMode(startTimer1Pin, INPUT);
-  pinMode(startTimer2Pin, INPUT);
-  pinMode(startHangboard, INPUT);
-
-  pinMode(startPin1, INPUT);
-  pinMode(startPin2, INPUT);
-  pinMode(startPin3, INPUT);
-  pinMode(startPin4, INPUT);
-  pinMode(startPin5, INPUT);
-  pinMode(startPin6, INPUT);
 }
 
 void loop() {
-
+  /*
+  Serial.println(rtc.now().unixtime());
   noTone(speakerPin);
   countersetting = analogRead(potPin1);
   delay(10);
@@ -211,80 +238,83 @@ void loop() {
   val = map(countersetting, 0, 1024, COUNT_MIN, COUNT_MAX + 10);
   counter2 = (round(val / STEPS)) * STEPS;
 
-  // Display Timer 1
+    // Display Timer 1
+
+    /*  display.println("Set Timer 1:");
+      minuten1 = floor(counter1 / 60);
+      sekunden1 = counter1 % 60;
+      if (sekunden1 < 10) {
+        display.print("        ");
+        display.print(minuten1);
+        display.print(":0");
+        display.println(sekunden1);
+      } else {
+        display.print("        ");
+        display.print(minuten1);
+        display.print(":");
+        display.println(sekunden1);
+      }
+
+      // Display Timer 2
+      display.println("Set Timer 2:");
+      minuten2 = floor(counter2 / 60);
+      sekunden2 = counter2 % 60;
+      if (sekunden2 < 10) {
+        display.print("        ");
+        display.print(minuten2);
+        display.print(":0");
+        display.println(sekunden2);
+      } else {
+        display.print("        ");
+        display.print(minuten2);
+        display.print(":");
+        display.println(sekunden2);
+      }
+      display.display();
+      display.clearDisplay();*/
   display.clearDisplay();
-  display.setTextSize(1);
+  display.setTextSize(2);
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
-  display.println("Set Timer 1:");
-  minuten1 = floor(counter1 / 60);
-  sekunden1 = counter1 % 60;
-  if (sekunden1 < 10) {
-    display.print("        ");
-    display.print(minuten1);
-    display.print(":0");
-    display.println(sekunden1);
-  } else {
-    display.print("        ");
-    display.print(minuten1);
-    display.print(":");
-    display.println(sekunden1);
-  }
-
-  // Display Timer 2
-  display.println("Set Timer 2:");
-  minuten2 = floor(counter2 / 60);
-  sekunden2 = counter2 % 60;
-  if (sekunden2 < 10) {
-    display.print("        ");
-    display.print(minuten2);
-    display.print(":0");
-    display.println(sekunden2);
-  } else {
-    display.print("        ");
-    display.print(minuten2);
-    display.print(":");
-    display.println(sekunden2);
-  }
+  display.print(ButtonPressed());
   display.display();
   display.clearDisplay();
-
-  DateTime now = rtc.now();
-
-  if (digitalRead(startTimer1Pin) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    stufenintervall();
-  } else if (digitalRead(startTimer2Pin) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdown("Remaining Time 2", counter2, us_test, us_now, MELODY2);
-  } else if (digitalRead(startHangboard) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdownHangboard(us_test, us_now);
-  } else if (digitalRead(startPin1) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdown("Remaining Time", counterPin1, us_test, us_now, MELODY2);
-  } else if (digitalRead(startPin2) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdown("Remaining Time", counterPin2, us_test, us_now, MELODY2);
-  } else if (digitalRead(startPin3) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdown("Remaining Time", counterPin3, us_test, us_now, MELODY2);
-  } else if (digitalRead(startPin4) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdown("Remaining Time", counterPin4, us_test, us_now, MELODY2);
-  } else if (digitalRead(startPin5) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    // countdown("Remaining Time", counterPin5, us_test, us_now, MELODY2);
-  } else if (digitalRead(startPin6) == HIGH) {
-    startInXseconds(now.unixtime(), STARTIN);
-    timer(us_test, us_now, MELODY1);
-  }
-  delay(NOTE_LENGTH + 5);
-  noTone(speakerPin);
+  delay(100);
+  /*
+    if (digitalRead(startTimer1Pin) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      stufenintervall();
+    } else if (digitalRead(startTimer2Pin) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdown("Remaining Time 2", counter2, us_test, us_now, MELODY2);
+    } else if (digitalRead(startHangboard) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdownHangboard(us_test, us_now);
+    } else if (digitalRead(startPin1) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdown("Remaining Time", counterPin1, us_test, us_now, MELODY2);
+    } else if (digitalRead(startPin2) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdown("Remaining Time", counterPin2, us_test, us_now, MELODY2);
+    } else if (digitalRead(startPin3) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdown("Remaining Time", counterPin3, us_test, us_now, MELODY2);
+    } else if (digitalRead(startPin4) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdown("Remaining Time", counterPin4, us_test, us_now, MELODY2);
+    } else if (digitalRead(startPin5) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      // countdown("Remaining Time", counterPin5, us_test, us_now, MELODY2);
+    } else if (digitalRead(startPin6) == HIGH) {
+      startInXseconds(now.unixtime(), STARTIN);
+      timer(us_test, us_now, MELODY1);
+    }
+    delay(NOTE_LENGTH + 5);
+    noTone(speakerPin);
+    */
 }
 
 void playMelody(int melody) {
-
   if (melody == MELODY1) {
     for (int i = 0; i <= (numNotes - 1); i++) {
       tone(speakerPin, notes[i], NOTE_LENGTH);
@@ -364,6 +394,7 @@ void countdown(char text[], int counter, unsigned long us_test,
   noTone(speakerPin);
 }
 */
+/*
 void timer(unsigned long us_test, unsigned long us_now, int melody) {
 
   int counter = 0;
@@ -387,9 +418,8 @@ void timer(unsigned long us_test, unsigned long us_now, int melody) {
   noTone(speakerPin);
   delay(2000);
 }
-
+*/
 void countdownHangboard(unsigned long us_test, unsigned long us_now) {
-
   int counter = 0;
   int sets = 2;
   for (int i = 1; i <= sets; i++) {
@@ -481,7 +511,7 @@ void startInXseconds(uint32_t unixtime, uint8_t seconds) {
   display.clearDisplay();
   waitUntilSecondPassed(rtc.now().unixtime());
 }
-
+/*
 void stufenintervall() {
   // 7.5 minuten
   // Taste
@@ -553,4 +583,85 @@ void stufenintervall() {
   playMelody(MELODY3);
   noTone(speakerPin);
   delay(2000);
+}
+*/
+void resetKeys() {
+  for (int x = 0; x < COLMAX; x++) {
+    for (int y = 0; y < ROWMAX; x++) {
+      key[x][y] = 0;
+    }
+  }
+}
+
+void AddMatrix(int MAT1[4][3], int MAT2[4][3]) {
+  for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < 3; y++) {
+      key[x][y] = MAT1[x][y] + MAT2[x][y];
+    }
+  }
+}
+
+int ButtonPressed() {
+  /*
+     1   2   3
+     4   5   6
+     7   8   9
+    10  11  12
+  */
+  int col_scan;
+  for (int i = 0; i < ROWMAX; i++) {
+    digitalWrite(row[0], HIGH);
+    digitalWrite(row[1], HIGH);
+    digitalWrite(row[2], HIGH);
+    digitalWrite(row[3], HIGH);
+    digitalWrite(row[i], LOW);
+    for (int j = 0; j < COLMAX; j++) {
+      col_scan = digitalRead(col[j]);
+      if (col_scan == LOW) {
+        return keypress(i, j);
+        delay(200);
+      } else {
+        return 0;
+      }
+    }
+  }
+}
+
+int keypress(int r, int c) {
+  if (r == 0 && c == 0) {
+    return 1;
+  }
+  if (r == 0 && c == 1) {
+    return 2;
+  }
+  if (r == 0 && c == 2) {
+    return 3;
+  }
+  if (r == 1 && c == 0) {
+    return 4;
+  }
+  if (r == 1 && c == 1) {
+    return 5;
+  }
+  if (r == 1 && c == 2) {
+    return 6;
+  }
+  if (r == 2 && c == 0) {
+    return 7;
+  }
+  if (r == 2 && c == 1) {
+    return 8;
+  }
+  if (r == 2 && c == 2) {
+    return 9;
+  }
+  if (r == 3 && c == 0) {
+    return 10;
+  }
+  if (r == 3 && c == 1) {
+    return 11;
+  }
+  if (r == 3 && c == 2) {
+    return 12;
+  }
 }
